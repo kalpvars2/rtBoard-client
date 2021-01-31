@@ -1,0 +1,66 @@
+.toolbar{
+	width: 50%;
+    height: 8vh;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 15px;
+    padding: 1%;
+    position: sticky;
+    top: 2vh;
+    box-shadow: 0.3em 0.8em 20px 2px grey;
+    margin: auto;
+    margin-top: 2vh;
+}
+
+.tool{
+	height: 70%;
+	padding: 0.5em;
+	transition: transform 0.5s;
+	cursor: pointer;
+}
+
+.tool:hover{
+	transform: scale(1.2);
+}
+
+.selectedTool{
+	background: grey;
+	border-radius: 30%;
+}
+
+#colorPicker{
+	height: 1rem;
+	width: 1rem;
+	display: block;
+	margin: auto;
+	background: #d16a70;
+	border-radius: 50%;
+	border: 1px solid black;
+}
+
+#rangeInput{
+	width: 50%;
+}
+
+@media screen and (max-width: 768px){
+	.toolbar{
+		width: 60vw;
+	}
+	.tool{
+		height: 65%;
+		padding: 0.2em;
+	}
+}
+
+@media screen and (max-width: 555px){
+	.toolbar{
+		width: 80vw;
+	}
+	.tool{
+		height: 60%;
+		padding: 0.1em;
+	}
+}
