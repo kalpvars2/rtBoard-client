@@ -1,14 +1,14 @@
 import './App.css';
-import Toolbar from './components/Toolbar/Toolbar';
-import Canvas from './components/Canvas/Canvas';
+import {BrowserRouter as Router, Route} from 'react-router-dom';
+import Board from './components/Board/Board';
+import Join from './components/Join/Join';
 
 function App() {
-  let undoStack = [], redoStack = [];
   return (
-    <div className="App">
-      <Toolbar undoStack={undoStack} redoStack={redoStack}/>
-      <Canvas undoStack={undoStack} redoStack={redoStack}/>
-    </div>
+  	<Router>
+  		<Route path="/" exact component={Join} />
+  		<Route path="/board" component={Board} />
+  	</Router>
   );
 }
 

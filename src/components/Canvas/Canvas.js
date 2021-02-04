@@ -6,13 +6,14 @@ const Canvas = ({undoStack, redoStack}) => {
 		board.height = window.innerHeight;
 		board.width = window.innerWidth;
 		const ctx = board.getContext('2d');
-		ctx.strokeStyle = "blue";
 		ctx.lineWidth = 3;
 		ctx.lineJoin = "round";
 		ctx.lineCap = "round";
 		ctx.imageSmoothingEnabled = true;
 		ctx.imageSmoothingQuality = "high";
 		ctx.miterlimit = 1;
+		ctx.fillStyle = "#ffffff";
+		ctx.fillRect(0, 0, board.width, board.height);
 
 		let isMouseDown = false;
 

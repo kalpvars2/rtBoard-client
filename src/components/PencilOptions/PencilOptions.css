@@ -1,0 +1,40 @@
+.pencilOptions{
+	margin: auto;
+	margin-top: 0.7em;
+}
+
+.blackPencil{
+	background: black;
+}
+
+.bluePencil{
+	background: blue;
+}
+
+.redPencil{
+	background: #d00f0f;
+}
+
+.greenPencil{
+	background: green;
+}
+
+.color{
+	height: 0.9em;
+	width: 0.9em;
+	border-radius: 50%;
+}
+
+.colorPalette{
+	display: flex;
+	justify-content: space-around;
+}
+
+#rangeInputPencil{
+	width: 8vw;
+}
+
+#colorInput{
+	width: 2em;
+	border-radius: 50%;
+}

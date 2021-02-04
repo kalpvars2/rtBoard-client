@@ -1,16 +1,29 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import PencilOptions from '../PencilOptions/PencilOptions';
+import EraserOptions from '../EraserOptions/EraserOptions';
 import {ReactComponent as PencilSVG} from '../../assets/svg/pencil.svg';
 import {ReactComponent as EraserSVG} from '../../assets/svg/eraser.svg';
 import {ReactComponent as StickyNoteSVG} from '../../assets/svg/stickyNote.svg';
 import {ReactComponent as DownloadSVG} from '../../assets/svg/download.svg';
+import {ReactComponent as UploadPhotoSVG} from '../../assets/svg/uploadPhoto.svg';
 import {ReactComponent as UndoSVG} from '../../assets/svg/undo.svg';
 import {ReactComponent as RedoSVG} from '../../assets/svg/redo.svg';
-import {ReactComponent as SaveSVG} from '../../assets/svg/save.svg';
 import {ReactComponent as ToolExpanderSVG} from '../../assets/svg/toolExpander.svg';
-import { Undo, Redo, Redraw } from '../../helperFunctions';
+import { Undo, Redo, Redraw, createBox } from '../../helperFunctions';
 import './Toolbar.css';
 
+const createSticky = () => {
+	const writingPad = createBox();
+	const textArea = document.createElement('textarea');
+	writingPad.appendChild(textArea);
+};
+
 const Toolbar = ({undoStack, redoStack}) => {
+	const [selectedTool, setSelectedTool] = useState(null);
+	const [showPencilOptions, setShowPencilOptions] = useState(false);
+	const [showEraserOptions, setShowEraserOptions] = useState(false);
+	let currentPencilColor = '#000000';
+	
 	useEffect(() => {
 		const pencil = document.getElementById('pencil');
 		const eraser = document.getElementById('eraser');
@@ -20,13 +33,24 @@ const Toolbar = ({undoStack, redoStack}) => {
 		const ctx = board.getContext('2d');
 		
 		pencil.addEventListener('click', () => {
+			setSelectedTool('pencil');
+			setShowEraserOptions(false);
+			setShowPencilOptions(false);
 			pencil.classList.add('selectedTool');
 			eraser.classList.remove('selectedTool');
+			ctx.lineWidth = document.getElementById('rangeInputPencil').value;
+			ctx.strokeStyle = currentPencilColor;
 		});
 
 		eraser.addEventListener('click', () => {
+			setSelectedTool('eraser');
+			setShowEraserOptions(false);
+			setShowPencilOptions(false);
 			eraser.classList.add('selectedTool');
 			pencil.classList.remove('selectedTool');
+			ctx.lineWidth = document.getElementById('rangeInputEraser').value;
+			currentPencilColor = ctx.strokeStyle;
+			ctx.strokeStyle = "#ffffff";
 		});
 
 		undo.addEventListener('click', (event) => {
@@ -39,17 +63,92 @@ const Toolbar = ({undoStack, redoStack}) => {
 			Redraw(ctx, board, undoStack);
 		});
 
+		const pencilExpander = document.getElementById('pencilExpander');
+		const eraserExpander = document.getElementById('eraserExpander');
+		pencilExpander.style.visibility = "visible";
+		pencilExpander.addEventListener('click', () => setShowPencilOptions(true));
+		eraserExpander.addEventListener('click', () => setShowEraserOptions(true));
+		board.addEventListener('mousedown', () => {
+			setShowPencilOptions(false);
+			setShowEraserOptions(false);
+		});
+
+		const downloadTool = document.getElementById('downloadScreenshot');
+		downloadTool.addEventListener('click', (event) => {
+			const a = document.createElement('a');
+			a.download = Date.now();
+			a.href = board.toDataURL("image/png");
+			a.click();
+			a.remove();
+		});
+
+		const uploadImageSVG = document.getElementById('uploadImageSVG');
+		const fileInput = document.getElementById('uploadedImage');
+		uploadImageSVG.addEventListener('click', (event) => {
+			event.preventDefault();
+			fileInput.click();
+			fileInput.addEventListener('change', (event) => {
+				const writingPad = createBox();
+				const img = document.createElement('img');
+				img.src = URL.createObjectURL(event.target.files[0]);
+				img.setAttribute("class", "uploadedImage");
+				writingPad.appendChild(img);
+				img.onload = function () {
+					URL.revokeObjectURL(img.src);
+				};
+			});
+		});
+
 	}, []);
+
+	useEffect(() => {
+		if(selectedTool){
+			const selectableTools = document.getElementsByClassName("toolExpanderSVG");
+			for(let i = 0; i < selectableTools.length; ++i){
+				if(selectableTools[i].id === (selectedTool + 'Expander')){
+					selectableTools[i].style.visibility = "visible";
+				} else {
+					selectableTools[i].style.visibility = "hidden";
+				}
+			}
+		}
+	}, [selectedTool]);
+
+	useEffect(() => {
+		const pencilOptions = document.getElementsByClassName('pencilOptions')[0];
+		const eraserOptions = document.getElementsByClassName('eraserOptions')[0];
+		
+		if(showPencilOptions)
+			pencilOptions.style.visibility = "visible";
+		else
+			pencilOptions.style.visibility = "hidden";
+		
+		if(showEraserOptions)
+			eraserOptions.style.visibility = "visible";
+		else
+			eraserOptions.style.visibility = "hidden";
+	}, [showPencilOptions, showEraserOptions]);	
 
 	return (
 		<div className={"toolbar"}>
-			<PencilSVG title="Pencil" id = {"pencil"} className={"tool"}/>
-			<EraserSVG title="Eraser" id = {"eraser"} className={"tool"} />
-			<StickyNoteSVG title="Sticky Note" style= {{width: "auto"}} className={"tool"} />
-			<DownloadSVG title="Download Screenshot" style = {{width: "auto"}} className={"tool"} />
+			<div className={"tool expanderDiv"}>
+				<PencilSVG title="Pencil" id = {"pencil"} className={"selectedTool"}/>
+				<ToolExpanderSVG id = {"pencilExpander"} className={"toolExpanderSVG"} />
+				<PencilOptions className={"pencilOptions"}/>
+			</div>
+			<div className={"tool expanderDiv"}>
+				<EraserSVG title="Eraser" id = {"eraser"} />
+				<ToolExpanderSVG id = {"eraserExpander"} className={"toolExpanderSVG"} />
+				<EraserOptions className={"eraserOptions"}/>
+			</div>
+			<StickyNoteSVG onClick={createSticky} title="Sticky Note" style= {{width: "auto"}} className={"tool"} />
+			<div className={"tool"}>
+				<UploadPhotoSVG id={"uploadImageSVG"} title="Upload Image" />
+				<input id={"uploadedImage"} type="file" accept="image/*"/>
+			</div>
+			<DownloadSVG title="Download Screenshot" id={"downloadScreenshot"} style = {{width: "auto"}} className={"tool"} />
 			<UndoSVG title="Undo" id={"undo"} className={"tool"} />
 			<RedoSVG title="Redo" id={"redo"} className={"tool"} />
-			<SaveSVG title="Save" style={{width: "auto"}} className={"tool"} />
 		</div>
 	);
 };
