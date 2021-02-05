@@ -32,6 +32,11 @@ export const Redraw = (ctx, board, undoStack) => {
 			ctx.moveTo(x, y);
 		}
 	}
+	const eraser = document.getElementById('eraser');
+	if(eraser.classList[0] === 'selectedTool'){
+		ctx.strokeStyle = "#ffffff";
+		ctx.lineWidth = document.getElementById('rangeInputEraser').value;
+	}
 };
 
 export const createBox = () => {

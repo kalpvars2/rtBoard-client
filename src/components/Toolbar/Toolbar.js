@@ -9,19 +9,36 @@ import {ReactComponent as UploadPhotoSVG} from '../../assets/svg/uploadPhoto.svg
 import {ReactComponent as UndoSVG} from '../../assets/svg/undo.svg';
 import {ReactComponent as RedoSVG} from '../../assets/svg/redo.svg';
 import {ReactComponent as ToolExpanderSVG} from '../../assets/svg/toolExpander.svg';
+import {ReactComponent as ExitSVG} from '../../assets/svg/exit.svg';
 import { Undo, Redo, Redraw, createBox } from '../../helperFunctions';
 import './Toolbar.css';
 
-const createSticky = () => {
-	const writingPad = createBox();
-	const textArea = document.createElement('textarea');
-	writingPad.appendChild(textArea);
-};
 
-const Toolbar = ({undoStack, redoStack}) => {
+const Toolbar = ({history, socket, undoStack, redoStack}) => {
 	const [selectedTool, setSelectedTool] = useState(null);
 	const [showPencilOptions, setShowPencilOptions] = useState(false);
 	const [showEraserOptions, setShowEraserOptions] = useState(false);
+	const createSticky = () => {
+		const writingPad = createBox();
+		const textArea = document.createElement('textarea');
+		writingPad.appendChild(textArea);
+		textArea.id = Date.now();
+		if(socket)
+			socket.emit('createSticky', {id: textArea.id});
+		textArea.addEventListener('input', (event) => {
+			if(socket)
+				socket.emit('stickychange', {id: textArea.id, data: event.target.value});
+		});
+	};
+
+	const handleExit = () => {
+		const allCloseButtons = document.querySelectorAll('.close');
+		for(let i = 0; i < allCloseButtons.length; ++i){
+			allCloseButtons[i].click();
+		}
+		history.push('/');
+	};
+
 	let currentPencilColor = '#000000';
 	
 	useEffect(() => {
@@ -56,11 +73,13 @@ const Toolbar = ({undoStack, redoStack}) => {
 		undo.addEventListener('click', (event) => {
 			Undo(undoStack, redoStack);
 			Redraw(ctx, board, undoStack);
+			if(socket) socket.emit('undo');
 		});
 
 		redo.addEventListener('click', (event) => {
 			Redo(undoStack, redoStack);
 			Redraw(ctx, board, undoStack);
+			if(socket) socket.emit('redo');
 		});
 
 		const pencilExpander = document.getElementById('pencilExpander');
@@ -83,19 +102,24 @@ const Toolbar = ({undoStack, redoStack}) => {
 		});
 
 		const uploadImageSVG = document.getElementById('uploadImageSVG');
-		const fileInput = document.getElementById('uploadedImage');
-		uploadImageSVG.addEventListener('click', (event) => {
-			event.preventDefault();
-			fileInput.click();
-			fileInput.addEventListener('change', (event) => {
-				const writingPad = createBox();
-				const img = document.createElement('img');
-				img.src = URL.createObjectURL(event.target.files[0]);
-				img.setAttribute("class", "uploadedImage");
-				writingPad.appendChild(img);
-				img.onload = function () {
-					URL.revokeObjectURL(img.src);
-				};
+		uploadImageSVG.addEventListener('click', () => {
+			const uploadImageDiv = document.getElementById('uploadImageDiv');
+			uploadImageDiv.style.display = "flex";
+			const shareImageButton = document.getElementById('shareImageButton');
+			shareImageButton.addEventListener('click', (event) => {
+				const imageURL = document.getElementById('uploadedImage');
+				if(!imageURL.value)
+					event.preventDefault();
+				else{
+					const writingPad = createBox();
+					const img = document.createElement('img');
+					img.src = imageURL.value;
+					imageURL.value = "";
+					writingPad.appendChild(img);
+					uploadImageDiv.style.display = "none";
+					if(socket)
+						socket.emit('shareImage', img.src);
+				}
 			});
 		});
 
@@ -143,12 +167,16 @@ const Toolbar = ({undoStack, redoStack}) => {
 			</div>
 			<StickyNoteSVG onClick={createSticky} title="Sticky Note" style= {{width: "auto"}} className={"tool"} />
 			<div className={"tool"}>
-				<UploadPhotoSVG id={"uploadImageSVG"} title="Upload Image" />
-				<input id={"uploadedImage"} type="file" accept="image/*"/>
+				<UploadPhotoSVG id={"uploadImageSVG"} title="Share Image" />
+				<div id={"uploadImageDiv"} className={"uploadImageDiv"}>
+					<input id={"uploadedImage"} type="text" placeholder="Enter image URL"/>
+					<button id={"shareImageButton"} className="button">Share</button>
+				</div>
 			</div>
 			<DownloadSVG title="Download Screenshot" id={"downloadScreenshot"} style = {{width: "auto"}} className={"tool"} />
 			<UndoSVG title="Undo" id={"undo"} className={"tool"} />
 			<RedoSVG title="Redo" id={"redo"} className={"tool"} />
+			<ExitSVG style={{width: "auto"}} title="Leave" onClick={handleExit} id={"exit"} className={"tool"} />
 		</div>
 	);
 };

@@ -72,12 +72,24 @@
 	border: 2px solid red;
 }
 
-#uploadedImage{
-	display: none;
-}
-
 #uploadImageSVG{
 	height: 100%;
+}
+
+#uploadedImage{
+	text-align: center;
+	padding: 0.3em;
+	border-radius: 0.7em;
+	border: 2px solid #615c5c;
+}
+
+.uploadImageDiv{
+	display: none;
+	justify-content: space-around;
+	position: absolute;
+	top: 150%;
+	left: -220%;
+	align-items: center;
 }
 
 textarea{

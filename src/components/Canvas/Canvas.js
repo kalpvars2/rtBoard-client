@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-const Canvas = ({undoStack, redoStack}) => {
+const Canvas = ({socket, undoStack, redoStack}) => {
 	useEffect(() => {
 		const board = document.getElementsByTagName('canvas')[0];
 		board.height = window.innerHeight;
@@ -31,6 +31,8 @@ const Canvas = ({undoStack, redoStack}) => {
 				width: ctx.lineWidth
 			};
 			undoStack.push(point);
+			if(socket)
+				socket.emit('mousedown', point);
 		});
 
 		board.addEventListener("mousemove", (event) => {
@@ -46,12 +48,15 @@ const Canvas = ({undoStack, redoStack}) => {
 					width: ctx.lineWidth
 				};
 				undoStack.push(point);
+				if(socket)
+					socket.emit('mousemove', point);
 			}
 		});
 
 		board.addEventListener("mouseup", (event) => {
 			isMouseDown = false;
 		});
+
 	}, []);
 	return (
 		<div>
