@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import {createTypeSpace} from '../../helperFunctions.js';
 
 const Canvas = ({socket, undoStack, redoStack}) => {
 	useEffect(() => {
@@ -55,6 +56,24 @@ const Canvas = ({socket, undoStack, redoStack}) => {
 
 		board.addEventListener("mouseup", (event) => {
 			isMouseDown = false;
+		});
+
+		board.addEventListener('dblclick', (event) => {
+			const {typeDiv, textArea, closeButton} = createTypeSpace(ctx, board, event.clientX, event.clientY);
+			textArea.id = Date.now();
+			textArea.style.color = ctx.strokeStyle;
+			typeDiv.id = textArea.id + "Div";
+			closeButton.addEventListener('click', () => {
+				typeDiv.remove();
+				if(socket)
+					socket.emit('removetypespace', typeDiv.id);
+			});
+			if(socket)
+				socket.emit('createtypespace', {id: textArea.id, x : event.clientX, y : event.clientY, color: ctx.strokeStyle});
+			textArea.addEventListener('input', (event) => {
+				if(socket)
+					socket.emit('typespacechange', {id: textArea.id, data: event.target.value});
+			});
 		});
 
 	}, []);

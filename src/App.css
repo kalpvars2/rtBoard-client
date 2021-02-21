@@ -88,3 +88,29 @@ cursor: pointer;
 .close:hover{
 cursor: pointer;
 }
+
+.typeDiv{
+  height: max-content;
+  width: max-content;
+}
+
+.nav{
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.closeButton{
+  height: 1em;
+  width: 1em;
+  border-radius: 50%;
+  margin: 1px;
+  background: red;
+}
+
+.typeSpace{
+  height: 2em;
+  background: transparent;
+  outline: none;
+  border: 1px dashed grey;
+}

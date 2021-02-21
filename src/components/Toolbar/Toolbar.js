@@ -18,7 +18,7 @@ const Toolbar = ({history, socket, undoStack, redoStack}) => {
 	const [selectedTool, setSelectedTool] = useState(null);
 	const [showPencilOptions, setShowPencilOptions] = useState(false);
 	const [showEraserOptions, setShowEraserOptions] = useState(false);
-	const createSticky = () => {
+	const createSticky = (event) => {
 		const writingPad = createBox();
 		const textArea = document.createElement('textarea');
 		writingPad.appendChild(textArea);

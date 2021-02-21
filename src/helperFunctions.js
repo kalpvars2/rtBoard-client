@@ -99,3 +99,23 @@ export const createBox = () => {
 	return workArea;
 };
 
+export const createTypeSpace = (ctx, board, x, y) => {
+	const typeDiv = document.createElement('div');
+	const nav = document.createElement('div');
+	const closeButton = document.createElement('div');
+	const textArea = document.createElement('textarea');
+	typeDiv.setAttribute('class', 'typeDiv');
+	nav.setAttribute('class', 'nav');
+	closeButton.setAttribute('class', 'closeButton');
+	textArea.setAttribute('class', 'typeSpace');
+	nav.appendChild(closeButton);	
+	typeDiv.appendChild(nav);
+	typeDiv.appendChild(textArea);
+	typeDiv.style.position = "absolute";
+	typeDiv.style.top = (y - 16) + "px";
+	typeDiv.style.left = x + "px";
+	textArea.style.width = 0.6 * (board.width - x) + "px";
+	document.body.appendChild(typeDiv);
+	textArea.focus();
+	return {typeDiv, textArea, closeButton};
+};

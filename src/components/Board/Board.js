@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 import {apiURL} from '../../services/config.js';
 import Toolbar from '../Toolbar/Toolbar';
 import Canvas from '../Canvas/Canvas';
-import { Undo, Redo, Redraw, createBox } from '../../helperFunctions';
+import { Undo, Redo, Redraw, createBox, createTypeSpace } from '../../helperFunctions';
 
 let socket;
 
@@ -70,6 +70,30 @@ const Board = ({history, location}) => {
 			const textArea = document.getElementById(id);
 			textArea.value = data;
 		});
+
+		socket.on('oncreatetypespace', ({id, x, y, color}) => {
+			const {typeDiv, textArea, closeButton} = createTypeSpace(ctx, board, x, y);
+			textArea.id = id;
+			textArea.style.color = color;
+			typeDiv.id = id + "Div";
+			closeButton.addEventListener('click', () => {
+				typeDiv.remove();
+				socket.emit('removetypespace', typeDiv.id);
+			});
+			textArea.addEventListener('input', (event) => {
+				socket.emit('typespacechange', {id, data: event.target.value});
+			});
+		});
+
+		socket.on('ontypespacechange', ({id, data}) => {
+			const textArea = document.getElementById(id);
+			textArea.value = data;
+		});
+
+		socket.on('onremovetypespace', id => {
+			const typeDiv = document.getElementById(id);
+			typeDiv.remove();
+		})
 
 		socket.on('onshareimage', url => {
 			const writingPad = createBox();
